@@ -1,6 +1,7 @@
 provider "aws" {
-  region = "us-east-1"
-  alias  = "aws_cloudfront"
+  region  = "us-east-1"
+  alias   = "aws_cloudfront"
+  profile = var.aws_profile
 }
 
 locals {

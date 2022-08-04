@@ -1,3 +1,8 @@
+variable "aws_profile" {
+  type        = string
+  default     = "default"
+}
+
 variable "domain_name" {
   description = "domain name (or application name if no domain name available)"
 }
