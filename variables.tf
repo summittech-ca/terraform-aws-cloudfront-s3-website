@@ -33,6 +33,11 @@ variable "use_default_domain" {
   description = "Use CloudFront website address without Route53 and ACM certificate"
 }
 
+variable "create_acm_cert" {
+  default     = false
+  description = "Create an ACM cert instead of looking for one already assigned"
+}
+
 variable "upload_sample_file" {
   default     = false
   description = "Upload sample html file to s3 bucket"
