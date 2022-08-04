@@ -69,3 +69,13 @@ variable "s3_canned_acl" {
   type    = string
   default = "private"
 }
+
+variable "s3_bucket_basedir" {
+  type = string
+  default = ""
+}
+
+variable "s3_bucket_files" {
+  type    = list(string)
+  default = []
+}
