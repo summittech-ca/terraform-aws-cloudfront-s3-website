@@ -8,6 +8,7 @@ locals {
   acm_certs     = var.use_default_domain ? [] : ["acm"]
   domain_name   = var.use_default_domain ? [] : [var.domain_name]
   create_cert   = !var.use_default_domain && var.create_acm_cert
+  bucket_name   = replace(coalesce(var.bucket_name, var.domain_name), ".", "-")
 }
 
 data "aws_acm_certificate" "acm_cert" {
@@ -72,7 +73,7 @@ data "aws_iam_policy_document" "s3_bucket_policy" {
     ]
 
     resources = [
-      "arn:aws:s3:::${var.domain_name}/*",
+      "arn:aws:s3:::${local.bucket_name}/*",
     ]
 
     principals {
@@ -86,18 +87,18 @@ data "aws_iam_policy_document" "s3_bucket_policy" {
 }
 
 resource "aws_s3_bucket" "s3_bucket" {
-  bucket = var.domain_name
+  bucket = local.bucket_name
   policy = data.aws_iam_policy_document.s3_bucket_policy.json
   tags   = var.tags
 }
 
 resource "aws_s3_bucket_acl" "s3_bucket" {
-  bucket = var.domain_name
-  acl = "private"
+  bucket = aws_s3_bucket.s3_bucket.id
+  acl    = var.s3_canned_acl
 }
 
 resource "aws_s3_bucket_versioning" "s3_bucket" {
-  bucket = var.domain_name
+  bucket = aws_s3_bucket.s3_bucket.id
   versioning_configuration {
     status = "Enabled"
   }
@@ -143,7 +144,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   ]
 
   origin {
-    domain_name = "${var.domain_name}.s3.amazonaws.com"
+    domain_name = aws_s3_bucket.s3_bucket.bucket_regional_domain_name
     origin_id   = "s3-cloudfront"
 
     s3_origin_config {
@@ -221,5 +222,5 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 }
 
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
-  comment = "access-identity-${var.domain_name}.s3.amazonaws.com"
+  comment = "access-identity-${local.bucket_name}.s3.amazonaws.com"
 }

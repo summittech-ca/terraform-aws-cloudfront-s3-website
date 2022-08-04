@@ -59,3 +59,13 @@ variable "cloudfront_max_ttl" {
   default     = 31536000
   description = "The maximum TTL for the cloudfront cache"
 }
+
+variable "bucket_name" {
+  type    = string
+  default = ""
+}
+
+variable "s3_canned_acl" {
+  type    = string
+  default = "private"
+}
