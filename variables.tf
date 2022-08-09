@@ -1,6 +1,5 @@
 variable "aws_profile" {
   type        = string
-  default     = "default"
 }
 
 variable "domain_name" {
@@ -70,12 +69,7 @@ variable "s3_canned_acl" {
   default = "private"
 }
 
-variable "s3_bucket_basedir" {
+variable "s3_bucket_sync_dir" {
   type = string
-  default = ""
 }
 
-variable "s3_bucket_files" {
-  type    = list(string)
-  default = []
-}

@@ -236,12 +236,11 @@ locals {
 	}
 }
 
-resource "aws_s3_bucket_object" "frontend_object" {
-	for_each = toset(var.s3_bucket_files)
-	key      = each.value
-	source   = "${var.s3_bucket_basedir}/${each.value}"
-	bucket   = aws_s3_bucket.s3_bucket.id
-
-	etag         = filemd5("${var.s3_bucket_basedir}/${each.value}")
-	content_type = lookup(local.mime_type_mappings, concat(regexall("\\.([^\\.]*)$", basename(each.value)), [[""]])[0][0], "application/octet-stream")
+resource "null_resource" "s3_sync" {
+  provisioner "local-exec" {
+    command = "aws --profile ${var.aws_profile} s3 sync ${var.s3_bucket_sync_dir} s3://${aws_s3_bucket.s3_bucket.id}"
+  }
+	triggers = {
+		dir_sha1 = sha1(join("", [for f in fileset(var.s3_bucket_sync_dir, "*") : filesha1("${var.s3_bucket_sync_dir}/${f}")]))
+	}
 }
