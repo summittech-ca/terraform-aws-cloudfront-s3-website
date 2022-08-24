@@ -1,8 +1,3 @@
-provider "aws" {
-	region  = "us-east-1"
-	alias   = "aws_cloudfront"
-	profile = var.aws_profile
-}
 locals {
 	default_certs = var.use_default_domain ? ["default"] : []
 	acm_certs     = var.use_default_domain ? [] : ["acm"]
@@ -14,7 +9,7 @@ locals {
 data "aws_acm_certificate" "acm_cert" {
 	count    = (!var.use_default_domain && !var.create_acm_cert) ? 1 : 0
 	domain   = coalesce(var.acm_certificate_domain, "*.${var.hosted_zone}")
-	provider = aws.aws_cloudfront
+	provider = aws
 	//CloudFront uses certificates from US-EAST-1 region only
 	statuses = [
 		"ISSUED",
@@ -25,7 +20,7 @@ resource "aws_acm_certificate" "acm_cert" {
 	count    = local.create_cert ? 1 : 0
 	domain_name       = coalesce(var.acm_certificate_domain, "*.${var.hosted_zone}")
 	validation_method = "DNS"
-	provider = aws.aws_cloudfront
+	provider = aws
 
 	lifecycle {
 		create_before_destroy = true
@@ -57,7 +52,7 @@ resource "aws_acm_certificate_validation" "acm_cert" {
 	count = local.create_cert ? 1 : 0
 	certificate_arn         = aws_acm_certificate.acm_cert[0].arn
 	validation_record_fqdns = [for record in aws_route53_record.acm_cert : record.fqdn]
-	provider                = aws.aws_cloudfront
+	provider                = aws
 }
 
 locals {
